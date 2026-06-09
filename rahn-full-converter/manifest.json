@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "رهن کامل Converter",
+  "description": "تبدیل خودکار اجاره و رهن به معادل رهن کامل در دیوار و شیپور",
+  "version": "1.1",
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://divar.ir/*",
+        "https://www.divar.ir/*",
+        "https://sheypoor.com/*",
+        "https://www.sheypoor.com/*",
+        "https://*.kilid.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
