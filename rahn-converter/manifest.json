@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "محاسبه‌گر رهن کامل",
+  "description": "با F8 پنجره محاسبه رهن کامل باز می‌شود",
+  "version": "3.0",
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://divar.ir/*", "https://www.divar.ir/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
