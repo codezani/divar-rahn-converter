@@ -1,5 +1,5 @@
 // content.js
-console.log('%c✅ رهن کامل Converter v3.8 | F8 - قابل جابجایی', 'color:#166534; font-weight:bold; font-size:16px');
+console.log('%c✅ محاسبه‌گر رهن کامل v3.9 | F8 - تب چرخشی', 'color:#166534; font-weight:bold; font-size:16px');
 
 function showCalculator() {
   document.querySelectorAll('.rahn-calculator-box').forEach(el => el.remove());
@@ -21,7 +21,6 @@ function showCalculator() {
     font-family: Tahoma, sans-serif;
     text-align: center;
     cursor: move;
-    user-select: none;
   `;
 
   box.innerHTML = `
@@ -40,20 +39,33 @@ function showCalculator() {
 
   document.body.appendChild(box);
 
-  // قابلیت جابجایی پنجره (Drag)
   makeDraggable(box);
 
-  // محاسبه خودکار هنگام تایپ
   const inputs = box.querySelectorAll('input');
-  inputs.forEach(input => input.addEventListener('input', autoCalculate));
+  inputs.forEach((input, index) => {
+    input.addEventListener('input', autoCalculate);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const nextIndex = (index + 1) % inputs.length;
+        inputs[nextIndex].focus();
+      }
+    });
+  });
+
+  // فوکوس اولیه روی اولین فیلد
+  setTimeout(() => {
+    document.getElementById('rahn-in').focus();
+  }, 100);
 
   autoCalculate();
 }
 
 function makeDraggable(element) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  const header = element.querySelector('h3');
 
-  element.querySelector('h3').onmousedown = dragMouseDown;
+  header.onmousedown = dragMouseDown;
 
   function dragMouseDown(e) {
     e.preventDefault();
@@ -96,8 +108,7 @@ function autoCalculate() {
   if (rahn > 0) html += `ودیعه: ${rahn.toLocaleString('fa-IR')} تومان<br>`;
   if (area > 0) html += `رهن هر متر: ${Math.round(totalRahn / area).toLocaleString('fa-IR')} تومان`;
 
-  const resultDiv = document.getElementById('calc-result');
-  if (resultDiv) resultDiv.innerHTML = html;
+  document.getElementById('calc-result').innerHTML = html;
 }
 
 function parseNumber(str) {
@@ -108,7 +119,6 @@ function parseNumber(str) {
   return parseInt(text) || 0;
 }
 
-// کلید F8
 document.addEventListener('keydown', (e) => {
   if (e.key === 'F8') {
     e.preventDefault();
