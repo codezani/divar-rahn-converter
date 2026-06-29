@@ -1,5 +1,5 @@
 // content.js
-console.log('%c✅ محاسبه‌گر رهن کامل v3.9 | F8 - تب چرخشی', 'color:#166534; font-weight:bold; font-size:16px');
+console.log('%c✅ محاسبه‌گر رهن کامل v4.0 | F8', 'color:#166534; font-weight:bold; font-size:16px');
 
 function showCalculator() {
   document.querySelectorAll('.rahn-calculator-box').forEach(el => el.remove());
@@ -42,22 +42,27 @@ function showCalculator() {
   makeDraggable(box);
 
   const inputs = box.querySelectorAll('input');
-  inputs.forEach((input, index) => {
+  inputs.forEach(input => {
     input.addEventListener('input', autoCalculate);
+    
+    // Spacebar = پاک کردن فیلد
     input.addEventListener('keydown', function(e) {
+      if (e.key === ' ') {
+        e.preventDefault();        // جلوگیری از اضافه شدن فاصله
+        this.value = '';           // پاک کردن کامل
+        autoCalculate();
+      }
+      
+      // تب چرخشی
       if (e.key === 'Tab') {
         e.preventDefault();
-        const nextIndex = (index + 1) % inputs.length;
-        inputs[nextIndex].focus();
+        const next = (Array.from(inputs).indexOf(this) + 1) % inputs.length;
+        inputs[next].focus();
       }
     });
   });
 
-  // فوکوس اولیه روی اولین فیلد
-  setTimeout(() => {
-    document.getElementById('rahn-in').focus();
-  }, 100);
-
+  setTimeout(() => document.getElementById('rahn-in').focus(), 100);
   autoCalculate();
 }
 
@@ -98,9 +103,7 @@ function autoCalculate() {
   const area = parseNumber(document.getElementById('area-in').value);
 
   let totalRahn = rahn;
-  if (rent > 0) {
-    totalRahn += Math.round(rent / 0.03);
-  }
+  if (rent > 0) totalRahn += Math.round(rent / 0.03);
 
   let html = `✅ رهن کامل: <span style="color:#166534; font-size:20px;">${totalRahn.toLocaleString('fa-IR')} تومان</span><br><br>`;
 
