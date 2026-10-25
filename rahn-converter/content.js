@@ -1,5 +1,5 @@
 // content.js
-console.log('%c✅ محاسبه‌گر رهن کامل v4.0 | F8', 'color:#166534; font-weight:bold; font-size:16px');
+console.log('%c✅ محاسبه‌گر رهن کامل v4.1 | F8 (میلیون تومان + اعشار)', 'color:#166534; font-weight:bold; font-size:16px');
 
 function showCalculator() {
   document.querySelectorAll('.rahn-calculator-box').forEach(el => el.remove());
@@ -26,8 +26,8 @@ function showCalculator() {
   box.innerHTML = `
     <h3 style="margin:0 0 20px 0; color:#166534; cursor:move;">🧮 محاسبه‌گر رهن کامل</h3>
     
-    <input type="text" id="rahn-in" placeholder="ودیعه / رهن (تومان)" style="width:100%; padding:12px; margin:8px 0; border:2px solid #4ade80; border-radius:10px; font-size:16px;">
-    <input type="text" id="rent-in" placeholder="اجاره ماهانه (تومان)" style="width:100%; padding:12px; margin:8px 0; border:2px solid #4ade80; border-radius:10px; font-size:16px;">
+    <input type="text" id="rahn-in" placeholder="ودیعه / رهن (میلیون تومان) مثال: 50 یا 2.5" style="width:100%; padding:12px; margin:8px 0; border:2px solid #4ade80; border-radius:10px; font-size:16px;">
+    <input type="text" id="rent-in" placeholder="اجاره ماهانه (میلیون تومان) مثال: 5 یا 3.5" style="width:100%; padding:12px; margin:8px 0; border:2px solid #4ade80; border-radius:10px; font-size:16px;">
     <input type="text" id="area-in" placeholder="متراژ (اختیاری)" style="width:100%; padding:12px; margin:8px 0; border:2px solid #4ade80; border-radius:10px; font-size:16px;">
     
     <div id="calc-result" style="margin-top:15px; padding:18px; background:#d1fae5; border-radius:12px; font-size:18.5px; font-weight:bold; min-height:90px; border:3px solid #4ade80;"></div>
@@ -44,16 +44,14 @@ function showCalculator() {
   const inputs = box.querySelectorAll('input');
   inputs.forEach(input => {
     input.addEventListener('input', autoCalculate);
-    
-    // Spacebar = پاک کردن فیلد
+
     input.addEventListener('keydown', function(e) {
       if (e.key === ' ') {
-        e.preventDefault();        // جلوگیری از اضافه شدن فاصله
-        this.value = '';           // پاک کردن کامل
+        e.preventDefault();
+        this.value = '';
         autoCalculate();
       }
-      
-      // تب چرخشی
+
       if (e.key === 'Tab') {
         e.preventDefault();
         const next = (Array.from(inputs).indexOf(this) + 1) % inputs.length;
@@ -98,17 +96,18 @@ function makeDraggable(element) {
 }
 
 function autoCalculate() {
-  const rahn = parseNumber(document.getElementById('rahn-in').value);
-  const rent = parseNumber(document.getElementById('rent-in').value);
+  // ورودی به میلیون تومان (اعشار مجاز: 2.5 = 2,500,000 تومان)
+  const rahn = parseNumber(document.getElementById('rahn-in').value) * 1000000;
+  const rent = parseNumber(document.getElementById('rent-in').value) * 1000000;
   const area = parseNumber(document.getElementById('area-in').value);
 
   let totalRahn = rahn;
   if (rent > 0) totalRahn += Math.round(rent / 0.03);
 
-  let html = `✅ رهن کامل: <span style="color:#166534; font-size:20px;">${totalRahn.toLocaleString('fa-IR')} تومان</span><br><br>`;
+  let html = `✅ رهن کامل: <span style="color:#166534; font-size:20px;">${Math.round(totalRahn).toLocaleString('fa-IR')} تومان</span><br><br>`;
 
-  if (rent > 0) html += `اجاره ماهانه: ${rent.toLocaleString('fa-IR')} تومان<br>`;
-  if (rahn > 0) html += `ودیعه: ${rahn.toLocaleString('fa-IR')} تومان<br>`;
+  if (rent > 0) html += `اجاره ماهانه: ${Math.round(rent).toLocaleString('fa-IR')} تومان<br>`;
+  if (rahn > 0) html += `ودیعه: ${Math.round(rahn).toLocaleString('fa-IR')} تومان<br>`;
   if (area > 0) html += `رهن هر متر: ${Math.round(totalRahn / area).toLocaleString('fa-IR')} تومان`;
 
   document.getElementById('calc-result').innerHTML = html;
@@ -117,9 +116,22 @@ function autoCalculate() {
 function parseNumber(str) {
   if (!str) return 0;
   let text = str.toString().trim();
-  text = text.replace(/[^\d۰-۹]/g, '');
+
+  // تبدیل اعداد فارسی به انگلیسی
   text = text.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-  return parseInt(text) || 0;
+
+  // جداکننده هزارگان فارسی/انگلیسی را حذف کن، اعشار را نگه دار
+  // پشتیبانی از نقطه و ممیز فارسی (٫)
+  text = text.replace(/٫/g, '.');
+  text = text.replace(/[^\d.]/g, '');
+
+  // فقط اولین نقطه اعشار معتبر باشد
+  const parts = text.split('.');
+  if (parts.length > 2) {
+    text = parts[0] + '.' + parts.slice(1).join('');
+  }
+
+  return parseFloat(text) || 0;
 }
 
 document.addEventListener('keydown', (e) => {
