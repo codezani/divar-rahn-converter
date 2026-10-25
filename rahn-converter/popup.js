@@ -1,26 +1,40 @@
 function formatToman(num) {
-  return num.toLocaleString('fa-IR') + ' تومان';
+  return Math.round(num).toLocaleString('fa-IR') + ' تومان';
 }
 
 function parseNumber(str) {
   if (!str) return 0;
   let text = str.toString().trim();
-  text = text.replace(/[^\d۰-۹]/g, '');
+
+  // تبدیل اعداد فارسی به انگلیسی
   text = text.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-  return parseInt(text) || 0;
+
+  // ممیز فارسی → نقطه
+  text = text.replace(/٫/g, '.');
+  // فقط رقم و نقطه باقی بماند
+  text = text.replace(/[^\d.]/g, '');
+
+  // فقط یک نقطه اعشار
+  const parts = text.split('.');
+  if (parts.length > 2) {
+    text = parts[0] + '.' + parts.slice(1).join('');
+  }
+
+  return parseFloat(text) || 0;
 }
 
 function calculate() {
-  const rahn = parseNumber(document.getElementById('rahn').value);
-  const rent = parseNumber(document.getElementById('rent').value);
+  // ورودی به میلیون تومان (اعشار مجاز: 2.5 = 2,500,000 تومان)
+  const rahn = parseNumber(document.getElementById('rahn').value) * 1000000;
+  const rent = parseNumber(document.getElementById('rent').value) * 1000000;
   const area = parseNumber(document.getElementById('area').value);
 
   let totalRahn = rahn;
   if (rent > 0) {
-    totalRahn += (rent / 0.03);   // فرمول دقیق شما
+    totalRahn += (rent / 0.03);
   }
 
-  let html = `<strong>✅ رهن کامل: ${formatToman(Math.round(totalRahn))}</strong><br><br>`;
+  let html = `<strong>✅ رهن کامل: ${formatToman(totalRahn)}</strong><br><br>`;
 
   if (rent > 0) html += `اجاره ماهانه: ${formatToman(rent)}<br>`;
   if (rahn > 0) html += `ودیعه: ${formatToman(rahn)}<br>`;
